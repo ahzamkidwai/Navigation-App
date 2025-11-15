@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MapView from "./components/MapView";
 import { Mic, LocateFixed } from "lucide-react";
 import AIRecommendations from "./components/AIRecommendations";
@@ -16,8 +16,13 @@ export default function App() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
 
+  const [routeInfo, setRouteInfo] = useState(null);
+
   const apiKey = import.meta.env.VITE_API_KEY;
 
+  // ----------------------------
+  // CLEAN PLACES DATA
+  // ----------------------------
   const cleanPlacesData = (dataArray) =>
     dataArray.map((item) => ({
       id: item.properties.place_id,
@@ -26,6 +31,9 @@ export default function App() {
       lon: item.properties.lon,
     }));
 
+  // ----------------------------
+  // AUTOCOMPLETE API
+  // ----------------------------
   const fetchPlaces = async (query, type) => {
     if (query.length < 3) {
       type === "source" ? setSourceSuggestions([]) : setDestSuggestions([]);
@@ -39,16 +47,19 @@ export default function App() {
     try {
       const res = await fetch(url);
       const data = await res.json();
+      const clean = cleanPlacesData(data.features);
 
-      const cleaned = cleanPlacesData(data.features);
       type === "source"
-        ? setSourceSuggestions(cleaned)
-        : setDestSuggestions(cleaned);
+        ? setSourceSuggestions(clean)
+        : setDestSuggestions(clean);
     } catch (err) {
       console.error("API Error:", err);
     }
   };
 
+  // ----------------------------
+  // VOICE INPUT
+  // ----------------------------
   const startVoiceInput = (setter) => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -71,17 +82,14 @@ export default function App() {
     };
   };
 
-  // -------------------------------
+  // ----------------------------
   // GET ROUTE FROM GEOAPIFY
-  // -------------------------------
+  // ----------------------------
   const getRoute = async () => {
     if (!sourceCoords || !destCoords) {
       alert("Please select valid Source & Destination");
       return;
     }
-    console.log("Fetching route...");
-    console.log("Source:", sourceCoords);
-    console.log("Destination:", destCoords);
 
     const url = `https://api.geoapify.com/v1/routing?waypoints=${sourceCoords.lat},${sourceCoords.lon}|${destCoords.lat},${destCoords.lon}&mode=drive&apiKey=${apiKey}`;
 
@@ -89,17 +97,30 @@ export default function App() {
       const res = await fetch(url);
       const data = await res.json();
 
-      const coordinates = data?.features?.[0]?.geometry?.coordinates?.[0] || [];
+      const feature = data?.features?.[0];
+      const coordinates = feature?.geometry?.coordinates?.[0] || [];
 
       const latlngs = coordinates.map((c) => ({ lat: c[1], lon: c[0] }));
       setRouteCoords(latlngs);
+
+      // Extract info
+      const distance = feature.properties.distance; // meters
+      const time = feature.properties.time; // seconds
+      const mode = feature.properties.mode;
+
+      setRouteInfo({
+        distance: (distance / 1000).toFixed(2), // km
+        duration: Math.round(time / 60), // minutes
+        mode,
+      });
     } catch (err) {
       console.error("Route Error:", err);
     }
   };
 
   return (
-    <div className="w-screen h-screen flex overflow-hidden">
+    <div className="w-screen h-screen flex overflow-hidden bg-gray-100">
+      {/* ---------------------- SIDEBAR ---------------------- */}
       <aside className="w-80 bg-white shadow-xl p-5 flex flex-col gap-6 overflow-y-auto">
         <h1 className="text-2xl font-bold text-blue-600">NavAI</h1>
 
@@ -189,7 +210,7 @@ export default function App() {
           {/* ROUTE BUTTON */}
           <button
             onClick={getRoute}
-            className="p-3 bg-blue-600 text-white rounded-xl w-full font-semibold"
+            className="p-3 bg-blue-600 text-white rounded-xl w-full font-semibold cursor-pointer"
           >
             Get Route
           </button>
@@ -202,14 +223,43 @@ export default function App() {
             <LocateFixed size={20} />
             Detect My Location
           </button>
+
+          {/* ---------------- ROUTE SUMMARY ---------------- */}
+          {routeInfo && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-2 shadow-md">
+              <h2 className="text-lg font-semibold text-blue-700">
+                Route Summary
+              </h2>
+
+              <div className="mt-3 space-y-2 text-sm text-gray-700">
+                <p>
+                  <span className="font-semibold">From:</span> {source}
+                </p>
+                <p>
+                  <span className="font-semibold">To:</span> {destination}
+                </p>
+
+                <hr className="my-2" />
+
+                <p>
+                  <span className="font-semibold">Distance:</span>{" "}
+                  {routeInfo.distance} km
+                </p>
+                <p>
+                  <span className="font-semibold">Duration:</span>{" "}
+                  {routeInfo.duration} min
+                </p>
+                <p>
+                  <span className="font-semibold">Mode:</span> {routeInfo.mode}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
-      <main className="flex-1 h-full">
-        {/* <MapView
-          onLocation={(pos) => setCurrentLocation(pos)}
-          routeCoords={routeCoords}
-        /> */}
+      {/* ---------------------- MAP AREA ---------------------- */}
+      <main className="flex-1 h-full relative">
         <MapView
           onLocation={(pos) => setCurrentLocation(pos)}
           routeCoords={routeCoords}
