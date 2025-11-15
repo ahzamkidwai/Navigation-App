@@ -1,6 +1,5 @@
 import { useState } from "react";
 import MapView from "./components/MapView";
-import AIRecommendations from "./components/AIRecommendations";
 import InputField from "./components/InputField";
 import RouteSummary from "./components/RouteSummary";
 
@@ -71,7 +70,7 @@ export default function App() {
 
         <button
           onClick={() => getRoute(sourceCoords, destCoords)}
-          className="p-3 bg-blue-600 text-white rounded-xl font-semibold"
+          className="p-3 bg-blue-600 text-white rounded-xl font-semibold cursor-pointer hover:bg-blue-700 transition"
         >
           Get Route
         </button>
@@ -90,7 +89,6 @@ export default function App() {
           sourceCoords={sourceCoords}
           destCoords={destCoords}
         />
-        <AIRecommendations coords={currentLocation} />
       </main>
     </div>
   );
