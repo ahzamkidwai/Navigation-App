@@ -62,24 +62,50 @@ export default function MapView({
       map.on("locationfound", (e) => {
         onLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
+
+      // 🔥 Important: Fix map rendering glitch on responsive layout
+      setTimeout(() => map.invalidateSize(), 300);
     }, []);
 
     return null;
   }
 
+  // Recenter map automatically when source or destination changes
+  function AutoRecenter({ target }) {
+    const map = useMap();
+
+    useEffect(() => {
+      if (target) {
+        map.setView([target.lat, target.lon], 13);
+        setTimeout(() => map.invalidateSize(), 200);
+      }
+    }, [target]);
+
+    return null;
+  }
+
   return (
-    <div className="w-full h-full">
+    <div
+      className="
+        w-full
+        h-[50vh]    /* mobile */
+        sm:h-[60vh]
+        md:h-full   /* desktop */
+      "
+    >
       <MapContainer center={position} zoom={13} className="w-full h-full">
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         <LocationFinder onLocation={onLocation} />
 
-        {/* USER LOCATION MARKER */}
+        <AutoRecenter target={sourceCoords || destCoords} />
+
+        {/* USER LOCATION */}
         <Marker position={position} icon={userIcon}>
           <Popup>You are here</Popup>
         </Marker>
 
-        {/* SOURCE MARKER */}
+        {/* SOURCE */}
         {sourceCoords && (
           <Marker
             position={[sourceCoords.lat, sourceCoords.lon]}
@@ -89,14 +115,14 @@ export default function MapView({
           </Marker>
         )}
 
-        {/* DESTINATION MARKER */}
+        {/* DESTINATION */}
         {destCoords && (
           <Marker position={[destCoords.lat, destCoords.lon]} icon={destIcon}>
             <Popup>Destination</Popup>
           </Marker>
         )}
 
-        {/* ROUTE POLYLINE */}
+        {/* ROUTE LINE */}
         {routeCoords?.length > 0 && (
           <Polyline
             positions={routeCoords.map((p) => [p.lat, p.lon])}

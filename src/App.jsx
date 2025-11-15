@@ -30,9 +30,21 @@ export default function App() {
   const { routeCoords, routeInfo, getRoute } = useRoute(apiKey);
 
   return (
-    <div className="w-screen h-screen flex overflow-hidden bg-gray-100">
-      <aside className="w-80 bg-white shadow-xl p-5 flex flex-col gap-6 overflow-y-auto">
-        <h1 className="text-2xl font-bold text-blue-600">NavAI</h1>
+    <div className="w-screen h-screen flex flex-col md:flex-row overflow-hidden bg-gray-100">
+      {/* Sidebar / Top Panel */}
+      <aside
+        className="
+      w-full md:w-80 
+      bg-white shadow-xl p-4 md:p-5 
+      flex flex-col gap-5 
+      overflow-y-auto 
+      md:h-full 
+      h-auto
+    "
+      >
+        <h1 className="text-2xl font-bold text-blue-600 text-center md:text-left">
+          NavAI
+        </h1>
 
         <InputField
           label="Source"
@@ -70,7 +82,12 @@ export default function App() {
 
         <button
           onClick={() => getRoute(sourceCoords, destCoords)}
-          className="p-3 bg-blue-600 text-white rounded-xl font-semibold cursor-pointer hover:bg-blue-700 transition"
+          className="
+          p-3 bg-blue-600 text-white rounded-xl
+          font-semibold cursor-pointer 
+          hover:bg-blue-700 transition
+          w-full
+        "
         >
           Get Route
         </button>
@@ -82,7 +99,8 @@ export default function App() {
         />
       </aside>
 
-      <main className="flex-1 h-full relative">
+      {/* Map Area */}
+      <main className="flex-1 h-[60vh] md:h-full relative">
         <MapView
           onLocation={(pos) => setCurrentLocation(pos)}
           routeCoords={routeCoords}
