@@ -1,9 +1,9 @@
-🌍 NavAI – Smart Navigation App
+# 🌍 NavAI – Smart Navigation App
 
 NavAI is a lightweight navigation assistant built with React + Vite, featuring autocomplete, voice input, map routing, and route summary display.
 It uses Geoapify APIs for place search and route generation.
 
-✨ Features
+# ✨ Features
 
 🔍 Place Autocomplete (Geoapify Places API)
 
@@ -19,38 +19,38 @@ It uses Geoapify APIs for place search and route generation.
 
 🎯 Clean UI built using TailwindCSS
 
-🛠️ Tech Stack
+# 🛠️ Tech Stack
 
-React + Vite
+* React + Vite
+* Geoapify Places API & Routing API
+* React Leaflet
+* TailwindCSS
+* Web Speech API
 
-Geoapify Places API & Routing API
-
-React Leaflet
-
-TailwindCSS
-
-Web Speech API
-
-🚀 Setup Instructions
+# 🚀 Setup Instructions
 
 Clone the repository
 
+```
 git clone <repo-url>
 cd project-folder
-
+```
 
 Install dependencies
 
+```
 npm install
-
+```
 
 Add Geoapify API key
 Create a .env file:
 
+```
 VITE_API_KEY=your_geoapify_key
-
+```
 
 Start the development server
 
+```
 npm run dev
-
+```
