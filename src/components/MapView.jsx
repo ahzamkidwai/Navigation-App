@@ -1,5 +1,6 @@
+import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
 const userIcon = new L.Icon({
@@ -7,7 +8,7 @@ const userIcon = new L.Icon({
   iconSize: [35, 35],
 });
 
-export default function MapView() {
+export default function MapView({ onLocation }) {
   const [position, setPosition] = useState([28.6139, 77.209]); // Default Delhi
 
   const getCurrentLocation = () => {
@@ -29,11 +30,25 @@ export default function MapView() {
     if (btn) btn.addEventListener("click", getCurrentLocation);
   }, []);
 
+  function LocationFinder({ onLocation }) {
+    const map = useMap();
+
+    useEffect(() => {
+      map.locate();
+
+      map.on("locationfound", (e) => {
+        onLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
+      });
+    }, []);
+
+    return null;
+  }
+
   return (
     <div className="w-full h-full">
       <MapContainer center={position} zoom={13} className="w-full h-full">
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
+        <LocationFinder onLocation={onLocation} />
         <Marker position={position} icon={userIcon}>
           <Popup>You are here</Popup>
         </Marker>

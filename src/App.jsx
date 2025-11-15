@@ -1,10 +1,12 @@
 import { useState } from "react";
 import MapView from "./components/MapView";
 import { Mic, LocateFixed } from "lucide-react";
+import AIRecommendations from "./components/AIRecommendations";
 
 export default function App() {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
+  const [currentLocation, setCurrentLocation] = useState(null);
 
   const startVoiceInput = (setter) => {
     const SpeechRecognition =
@@ -100,7 +102,9 @@ export default function App() {
 
       {/* MAP AREA */}
       <main className="flex-1 h-full">
-        <MapView />
+        <MapView onLocation={(pos) => setCurrentLocation(pos)} />
+
+        <AIRecommendations coords={currentLocation} />
       </main>
     </div>
   );
